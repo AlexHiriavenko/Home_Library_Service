@@ -1,865 +1,1396 @@
-openapi: 3.0.0
-info:
-  title: Home Library Service
-  description: Home music library service
-  version: 1.0.0
-
-servers:
-  - url: /api
-
-components:
-  schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        login:
-          type: string
-          example: 'TestUser'
-        version:
-          type: number
-          example: 1
-        createAt:
-          type: number
-          example: 1655000000
-        updateAt:
-          type: number
-          example: 1655000000
-      required:
-        - id
-        - login
-    Artist:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: 'Freddie Mercury'
-        grammy:
-          type: boolean
-          example: false
-      required:
-        - id
-        - name
-    Album:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: 'Innuendo'
-        year:
-          type: integer
-          example: 1991
-        artistId:
-          type: string
-          format: uuid
-          nullable: true
-      required:
-        - id
-        - name
-    Track:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: The Show Must Go On
-        artistId:
-          type: string
-          format: uuid
-          nullable: true
-        albumId:
-          type: string
-          format: uuid
-          nullable: true
-        duration:
-          type: integer
-          description: In seconds
-          example: 262
-      required:
-        - id
-        - name
-        - duration
-    Favorites:
-      type: object
-      properties:
-        artists:
-          type: array
-          items:
-            $ref: '#/components/schemas/Artist'
-        albums:
-          type: array
-          items:
-            $ref: '#/components/schemas/Album'
-        tracks:
-          type: array
-          items:
-            $ref: '#/components/schemas/Track'
-  responses:
-    UnauthorizedError:
-      description: Access token is missing or invalid
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-security:
-  - bearerAuth: []
-
-paths:
-  /login:
-    post:
-      tags:
-        - Login
-      security: []
-      summary: Login
-      description: Logins a user and returns a JWT-token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                login:
-                  type: string
-                  description: Username
-                password:
-                  type: string
-                  description: Password
-              required:
-                - user
-                - login
-      responses:
-        200:
-          description: Successful login.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                description: JWT Token
-        403:
-          description: Incorrect login or password
-  /signup:
-    post:
-      tags:
-        - Signup
-      security: [ ]
-      summary: Signup
-      description: Signup a user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                login:
-                  type: string
-                  minLength: 3
-                  maxLength: 255
-                  description: Username
-                password:
-                  type: string
-                  format: password
-                  pattern: ^[a-zA-Z0-9]{3,30}
-                  description: Password
-              required:
-                - login
-                - password
-      responses:
-        204:
-          description: Successful signup
-        400:
-          description: Bad request
-        409:
-          description: Conflict. Login already exists
-  /users:
-    get:
-      tags:
-        - Users
-      summary: Get all users
-      description: Gets all users
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-    post:
-      tags:
-        - Users
-      summary: Create user
-      description: Creates a new user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                login:
-                  type: string
-                  description: The user's login
-                password:
-                  type: string
-                  description: The user's password
-              required:
-                - login
-                - password
-      responses:
-        201:
-          description: The user has been created.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        400:
-          description: Bad request. body does not contain required fields
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-  /users/{userId}:
-    parameters:
-      - name: userId
-        in: path
-        required: true
-        schema:
-          type: string
-    get:
-      tags:
-        - Users
-      summary: Get single user by id
-      description: Get single user by id
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        400:
-          description: Bad request. userId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: User not found
-
-    put:
-      tags:
-        - Users
-      summary: Update a user's password
-      description: Updates a user's password by ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                oldPassword:
-                  type: string
-                  description: The user's old password
-                newPassword:
-                  type: string
-                  description: The user's new password
-              required:
-                - oldPassword
-                - newPassword
-      responses:
-        200:
-          description: The user has been updated.
-          content:
-            application/json:
-              schema:
-                type: object
-                title: example
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                  login:
-                    type: string
-                    example: TestUser
-                  version:
-                    type: integer
-                    example: 2
-                  createAt:
-                    type: integer
-                    example: 1655000000
-                  updateAt:
-                    type: integer
-                    example: 1655999999
-        400:
-          description: Bad request. userId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        403:
-          description: oldPassword is wrong
-        404:
-          description: User not found
-
-    delete:
-      tags:
-        - Users
-      summary: Delete user
-      description: Deletes user by ID.
-      responses:
-        204:
-          description: The user has been deleted
-        400:
-          description: Bad request. userId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: User not found
-  /tracks:
-    get:
-      tags:
-        - Track
-      summary: Get tracks list
-      description: Gets all library tracks list
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Track'
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-    post:
-      tags:
-        - Track
-      summary: Add new track
-      description: Add new track information
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                artistId:
-                  type: string
-                  format: uuid
-                albumId:
-                  type: string
-                  format: uuid
-                duration:
-                  type: integer
-                  description: In seconds
-              required:
-                - name
-                - duration
-      responses:
-        201:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Track'
-        400:
-          description: Bad request. body does not contain required fields
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-  /tracks/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    get:
-      tags:
-        - Track
-      summary: Get single track by id
-      description: Gets single track by id
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Track'
-        400:
-          description: Bad request. trackId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Track was not found.
-    put:
-      tags:
-        - Track
-      summary: Update track information
-      description: Update library track information by UUID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                name:
-                  type: string
-                  example: Bohemian Rhapsody
-                artistId:
-                  type: string
-                  format: uuid
-                  nullable: true
-                duration:
-                  type: integer
-                  description: In seconds
-                  example: 355
-                albumId:
-                  type: string
-                  format: uuid
-                  nullable: true
-              required:
-                - name
-                - duration
-      responses:
-        200:
-          description: The track has been updated.
-          content:
-            application/json:
-              schema:
-                type: object
-                title: example
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                  name:
-                    type: string
-                    example: Bohemian Rhapsody
-                  artistId:
-                    type: string
-                    format: uuid
-                    nullable: true
-                  duration:
-                    type: integer
-                    description: In seconds
-                    example: 355
-                  albumId:
-                    type: string
-                    format: uuid
-                    nullable: true
-        400:
-          description: Bad request. trackId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Track was not found.
-    delete:
-      tags:
-        - Track
-      summary: Delete track
-      description: Delete track from library
-      responses:
-        204:
-          description: Deleted successfully
-        400:
-          description: Bad request. trackId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Track was not found.
-  /albums:
-    get:
-      tags:
-        - Album
-      summary: Get albums list
-      description: Gets all library albums list
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Album'
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-    post:
-      tags:
-        - Album
-      summary: Add new album
-      description: Add new album information
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                name:
-                  type: string
-                year:
-                  type: integer
-                artistId:
-                  type: string
-                  format: uuid
-                  nullable: true
-              required:
-                - name
-                - year
-      responses:
-        201:
-          description: Album is created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Album'
-        400:
-          description: Bad request. body does not contain required fields
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-  /albums/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    get:
-      tags:
-        - Album
-      summary: Get single album by id
-      description: Gets single album by id
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Album'
-        400:
-          description: Bad request. albumId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Album was not found.
-    put:
-      tags:
-        - Album
-      summary: Update album information
-      description: Update library album information by UUID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                name:
-                  type: string
-                year:
-                  type: integer
-                artistId:
-                  type: string
-                  format: uuid
-                  nullable: true
-              required:
-                - name
-                - year
-      responses:
-        200:
-          description: The album has been updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Album'
-        400:
-          description: Bad request. albumId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Album was not found.
-    delete:
-      tags:
-        - Album
-      summary: Delete album
-      description: Delete album from library
-      responses:
-        204:
-          description: Deleted successfully
-        400:
-          description: Bad request. albumId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Album was not found.
-  /artists:
-    get:
-      tags:
-        - Artist
-      summary: Get all artists
-      description: Gets all artists
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Artist'
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-    post:
-      tags:
-        - Artist
-      summary: Add new artist
-      description: Add new artist
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                grammy:
-                  type: boolean
-              required:
-                - name
-                - grammy
-      responses:
-        201:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Artist'
-        400:
-          description: Bad request. body does not contain required fields
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-  /artists/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    get:
-      tags:
-        - Artist
-      summary: Get single artist by id
-      description: Get single artist by id
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Artist'
-        400:
-          description: Bad request. artistId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Artist was not found.
-    put:
-      tags:
-        - Artist
-      summary: Update artist information
-      description: Update artist information by UUID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                grammy:
-                  type: boolean
-              required:
-                - name
-                - grammy
-      responses:
-        200:
-          description: The artist has been updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Artist'
-        400:
-          description: Bad request. artistId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Artist was not found.
-    delete:
-      tags:
-        - Artist
-      summary: Delete artist
-      description: Delete artist from library
-      responses:
-        204:
-          description: Deleted successfully
-        400:
-          description: Bad request. artistId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Artist was not found.
-  /favs:
-    get:
-      tags:
-        - Favorites
-      summary: Get all favorites
-      description: Gets all favorites movies, tracks and books
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Favorites'
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-  /favs/track/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    post:
-      tags:
-        - Favorites
-      summary: Add track to the favorites
-      description: Add track to the favorites
-      responses:
-        201:
-          description: Added successfully
-        400:
-          description: Bad. trackId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        422:
-          description: Track with id doesn't exist.
-    delete:
-      tags:
-        - Favorites
-      summary: Delete track from favorites
-      description: Delete track from favorites
-      responses:
-        204:
-          description: Deleted successfully
-        400:
-          description: Bad. trackId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Track was not found.
-  /favs/album/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    post:
-      tags:
-        - Favorites
-      summary: Add album to the favorites
-      description: Add album to the favorites
-      responses:
-        201:
-          description: Added successfully
-        400:
-          description: Bad. albumId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        422:
-          description: Album with id doesn't exist.
-    delete:
-      tags:
-        - Favorites
-      summary: Delete album from favorites
-      description: Delete album from favorites
-      responses:
-        204:
-          description: Deleted successfully
-        400:
-          description: Bad. albumId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Album was not found.
-  /favs/artist/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    post:
-      tags:
-        - Favorites
-      summary: Add artist to the favorites
-      description: Add artist to the favorites
-      responses:
-        201:
-          description: Added successfully
-        400:
-          description: Bad request. artistId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        422:
-          description: Artist with id doesn't exist.
-    delete:
-      tags:
-        - Favorites
-      summary: Delete artist from favorites
-      description: Delete artist from favorites
-      responses:
-        204:
-          description: Deleted successfully
-        400:
-          description: Bad request. artistId is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          description: Artist was not found.
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/user": {
+      "post": {
+        "operationId": "UserController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data for creating a new user",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "name": "Vasia",
+                  "version": 1,
+                  "createdAt": 1672531199000,
+                  "updatedAt": 1672531299000
+                },
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "user successfully created",
+            "schema": {
+              "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "name": "Vasia",
+                "version": 1,
+                "createdAt": 1672531199000,
+                "updatedAt": 1672531299000
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseUserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          }
+        },
+        "summary": "Create user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "get": {
+        "operationId": "UserController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "users found",
+            "schema": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResponseUserDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all users",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "operationId": "UserController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID user id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "user found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Vasia",
+                    "version": 1,
+                    "createdAt": 1672531199000,
+                    "updatedAt": 1672531299000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "user not found"
+          }
+        },
+        "summary": "Get user by id",
+        "tags": [
+          "Users"
+        ]
+      },
+      "put": {
+        "operationId": "UserController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID user id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Data for updating an existing user",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "name": "Vasia",
+                  "version": 1,
+                  "createdAt": 1672531199000,
+                  "updatedAt": 1672531299000
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "user successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseUserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "403": {
+            "description": "old Password is wrong"
+          },
+          "404": {
+            "description": "user not found"
+          }
+        },
+        "summary": "Update user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UserController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID user id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "user successfully deleted"
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "user not found"
+          }
+        },
+        "summary": "Delete user by id",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/artist": {
+      "post": {
+        "operationId": "ArtistController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data for creating a new artist",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "name": "Vasia",
+                  "grammy": true
+                },
+                "$ref": "#/components/schemas/CreateArtistDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "artist successfully created",
+            "schema": {
+              "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "name": "Vasia",
+                "grammy": true
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseArtistDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          }
+        },
+        "summary": "Create artist",
+        "tags": [
+          "artist"
+        ]
+      },
+      "get": {
+        "operationId": "ArtistController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "artist found",
+            "schema": {
+              "example": {
+                "name": "Vasia",
+                "grammy": true
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResponseArtistDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all artist",
+        "tags": [
+          "artist"
+        ]
+      }
+    },
+    "/artist/{id}": {
+      "get": {
+        "operationId": "ArtistController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID artist id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "artist found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Vasia",
+                    "grammy": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "artist not found"
+          }
+        },
+        "summary": "Get artist by id",
+        "tags": [
+          "artist"
+        ]
+      },
+      "put": {
+        "operationId": "ArtistController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID artist id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Data for updating an existing artist",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "name": "Vasia",
+                  "grammy": true
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "artist successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseArtistDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "artist not found"
+          }
+        },
+        "summary": "Update artist",
+        "tags": [
+          "artist"
+        ]
+      },
+      "delete": {
+        "operationId": "ArtistController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID artist id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "artist successfully deleted"
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "artist not found"
+          }
+        },
+        "summary": "Delete artist by id",
+        "tags": [
+          "artist"
+        ]
+      }
+    },
+    "/track": {
+      "post": {
+        "operationId": "TrackController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data for creating a new track",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "name": "Track name",
+                  "artistId": "123e4567-e89b-12d3-a456-426614174000",
+                  "albumId": "123e4567-e89b-12d3-a456-426614174000",
+                  "duration": 240
+                },
+                "$ref": "#/components/schemas/CreateTrackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "track successfully created",
+            "schema": {
+              "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "name": "Track name",
+                "artistId": "123e4567-e89b-12d3-a456-426614174000",
+                "albumId": "123e4567-e89b-12d3-a456-426614174000",
+                "duration": 240
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseTrackDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          }
+        },
+        "summary": "Create track",
+        "tags": [
+          "track"
+        ]
+      },
+      "get": {
+        "operationId": "TrackController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "track found",
+            "schema": {
+              "example": {
+                "name": "Track name",
+                "artistId": "123e4567-e89b-12d3-a456-426614174000",
+                "albumId": "123e4567-e89b-12d3-a456-426614174000",
+                "duration": 240
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResponseTrackDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all track",
+        "tags": [
+          "track"
+        ]
+      }
+    },
+    "/track/{id}": {
+      "get": {
+        "operationId": "TrackController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID track id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "track found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Track name",
+                    "artistId": "123e4567-e89b-12d3-a456-426614174000",
+                    "albumId": "123e4567-e89b-12d3-a456-426614174000",
+                    "duration": 240
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "track not found"
+          }
+        },
+        "summary": "Get track by id",
+        "tags": [
+          "track"
+        ]
+      },
+      "put": {
+        "operationId": "TrackController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID track id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Data for updating an existing track",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "name": "Track name",
+                  "artistId": "123e4567-e89b-12d3-a456-426614174000",
+                  "albumId": "123e4567-e89b-12d3-a456-426614174000",
+                  "duration": 240
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "track successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseTrackDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "track not found"
+          }
+        },
+        "summary": "Update track",
+        "tags": [
+          "track"
+        ]
+      },
+      "delete": {
+        "operationId": "TrackController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID track id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "track successfully deleted"
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "track not found"
+          }
+        },
+        "summary": "Delete track by id",
+        "tags": [
+          "track"
+        ]
+      }
+    },
+    "/album": {
+      "post": {
+        "operationId": "AlbumController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Data for creating a new album",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "name": "Album name",
+                  "year": 2023,
+                  "artistId": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "$ref": "#/components/schemas/CreateAlbumDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "album successfully created",
+            "schema": {
+              "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "name": "Album name",
+                "year": 2023,
+                "artistId": "123e4567-e89b-12d3-a456-426614174000"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseAlbumDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          }
+        },
+        "summary": "Create album",
+        "tags": [
+          "album"
+        ]
+      },
+      "get": {
+        "operationId": "AlbumController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "album found",
+            "schema": {
+              "example": {
+                "name": "Album name",
+                "year": 2023,
+                "artistId": "123e4567-e89b-12d3-a456-426614174000"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResponseAlbumDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all album",
+        "tags": [
+          "album"
+        ]
+      }
+    },
+    "/album/{id}": {
+      "get": {
+        "operationId": "AlbumController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID album id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "album found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Album name",
+                    "year": 2023,
+                    "artistId": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "album not found"
+          }
+        },
+        "summary": "Get album by id",
+        "tags": [
+          "album"
+        ]
+      },
+      "put": {
+        "operationId": "AlbumController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID album id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Data for updating an existing album",
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "name": "Album name",
+                  "year": 2023,
+                  "artistId": "123e4567-e89b-12d3-a456-426614174000"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "album successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseAlbumDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "album not found"
+          }
+        },
+        "summary": "Update album",
+        "tags": [
+          "album"
+        ]
+      },
+      "delete": {
+        "operationId": "AlbumController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID album id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "album successfully deleted"
+          },
+          "400": {
+            "description": "Bad request. artistId is invalid (not uuid)"
+          },
+          "404": {
+            "description": "album not found"
+          }
+        },
+        "summary": "Delete album by id",
+        "tags": [
+          "album"
+        ]
+      }
+    },
+    "/favs": {
+      "get": {
+        "operationId": "FavoritesController_getAllFavorites",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all favorites",
+            "schema": {
+              "example": {
+                "artists": [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "artist name",
+                    "grammy": true
+                  }
+                ],
+                "albums": [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "album name",
+                    "year": 2023,
+                    "artistId": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                ],
+                "tracks": [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "track name",
+                    "albumId": "123e4567-e89b-12d3-a456-426614174000",
+                    "artistId": "123e4567-e89b-12d3-a456-426614174000",
+                    "duration": 240
+                  }
+                ]
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseFavoriteDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all favorites",
+        "tags": [
+          "favorites"
+        ]
+      }
+    },
+    "/favs/artist/{id}": {
+      "post": {
+        "operationId": "FavoritesController_addArtist",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID artist id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Add artist to favorites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseArtistDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. id is invalid (not uuid)"
+          },
+          "422": {
+            "description": "artist not found"
+          }
+        },
+        "summary": "Add artist to favorites",
+        "tags": [
+          "favorites"
+        ]
+      },
+      "delete": {
+        "operationId": "FavoritesController_removeArtist",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID artist id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Remove artist from favorites"
+          },
+          "400": {
+            "description": "Bad request. id is invalid (not uuid)"
+          },
+          "422": {
+            "description": "artist not found"
+          }
+        },
+        "summary": "Remove artist from favorites",
+        "tags": [
+          "favorites"
+        ]
+      }
+    },
+    "/favs/album/{id}": {
+      "post": {
+        "operationId": "FavoritesController_addAlbums",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID album id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Add album to favorites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseAlbumDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. id is invalid (not uuid)"
+          },
+          "422": {
+            "description": "album not found"
+          }
+        },
+        "summary": "Add album to favorites",
+        "tags": [
+          "favorites"
+        ]
+      },
+      "delete": {
+        "operationId": "FavoritesController_removeAlbums",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID album id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Remove album from favorites"
+          },
+          "400": {
+            "description": "Bad request. id is invalid (not uuid)"
+          },
+          "422": {
+            "description": "album not found"
+          }
+        },
+        "summary": "Remove album from favorites",
+        "tags": [
+          "favorites"
+        ]
+      }
+    },
+    "/favs/track/{id}": {
+      "post": {
+        "operationId": "FavoritesController_addTracks",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID track id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Add track to favorites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseTrackDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. id is invalid (not uuid)"
+          },
+          "422": {
+            "description": "track not found"
+          }
+        },
+        "summary": "Add track to favorites",
+        "tags": [
+          "favorites"
+        ]
+      },
+      "delete": {
+        "operationId": "FavoritesController_removeTracks",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID track id",
+            "schema": {
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Remove track from favorites"
+          },
+          "400": {
+            "description": "Bad request. id is invalid (not uuid)"
+          },
+          "422": {
+            "description": "track not found"
+          }
+        },
+        "summary": "Remove track from favorites",
+        "tags": [
+          "favorites"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Home Library Service",
+    "description": "Home music library service",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "example": "user123",
+            "description": "user login"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "description": "user password",
+            "minLength": 4,
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ]
+      },
+      "ResponseUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique user ID"
+          },
+          "login": {
+            "type": "string",
+            "description": "User's login"
+          },
+          "version": {
+            "type": "number",
+            "description": "version",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Date the record was created",
+            "example": 1672531199000
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "The date of the last update of the record",
+            "example": 1672531299000
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateArtistDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "artist123",
+            "description": "artist name"
+          },
+          "grammy": {
+            "type": "boolean",
+            "example": "true",
+            "description": "artist grammy"
+          }
+        },
+        "required": [
+          "name",
+          "grammy"
+        ]
+      },
+      "ResponseArtistDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "artist123",
+            "description": "artist name"
+          },
+          "grammy": {
+            "type": "boolean",
+            "example": "true",
+            "description": "artist grammy"
+          },
+          "id": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "format": "uuid",
+            "description": "Unique artist ID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CreateTrackDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "track name",
+            "description": "track name"
+          },
+          "artistId": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "format": "uuid | null",
+            "description": "Unique artist ID"
+          },
+          "albumId": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "format": "uuid | null",
+            "description": "Unique album ID"
+          },
+          "duration": {
+            "type": "number",
+            "example": 240,
+            "description": "track duration"
+          }
+        },
+        "required": [
+          "name",
+          "artistId",
+          "albumId",
+          "duration"
+        ]
+      },
+      "ResponseTrackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique track ID",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the track",
+            "example": "Track name"
+          },
+          "artistId": {
+            "type": "string",
+            "description": "ID of the artist associated with the track",
+            "example": "123e4567-e89b-12d3-a456-426614174000 | null"
+          },
+          "albumId": {
+            "type": "string",
+            "description": "ID of the album associated with the track",
+            "example": "123e4567-e89b-12d3-a456-426614174000 | null"
+          },
+          "duration": {
+            "type": "number",
+            "description": "Duration of the track in seconds",
+            "example": 240
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "artistId",
+          "albumId",
+          "duration"
+        ]
+      },
+      "CreateAlbumDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the album",
+            "example": "Album name"
+          },
+          "year": {
+            "type": "number",
+            "description": "Year of the album",
+            "example": 2023
+          },
+          "artistId": {
+            "type": "string",
+            "description": "ID of the artist associated with the album",
+            "example": "123e4567-e89b-12d3-a456-426614174000 | null"
+          }
+        },
+        "required": [
+          "name",
+          "year",
+          "artistId"
+        ]
+      },
+      "ResponseAlbumDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique album ID",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the album",
+            "example": "Album name"
+          },
+          "year": {
+            "type": "number",
+            "description": "Year of the album",
+            "example": 2023
+          },
+          "artistId": {
+            "type": "string",
+            "description": "ID of the artist associated with the album",
+            "example": "123e4567-e89b-12d3-a456-426614174000 | null"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "year",
+          "artistId"
+        ]
+      },
+      "ResponseFavoriteDto": {
+        "type": "object",
+        "properties": {
+          "artists": {
+            "description": "Favorite artists ids",
+            "example": [
+              {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "name": "artist name",
+                "grammy": true
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponseArtistDto"
+            }
+          },
+          "albums": {
+            "description": "Favorite albums ids",
+            "example": [
+              {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "name": "album name",
+                "year": 2023,
+                "artistId": "123e4567-e89b-12d3-a456-426614174000"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponseAlbumDto"
+            }
+          },
+          "tracks": {
+            "description": "Favorite tracks ids",
+            "example": [
+              {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "name": "track name",
+                "artistId": "123e4567-e89b-12d3-a456-426614174000",
+                "albumId": "123e4567-e89b-12d3-a456-426614174000",
+                "duration": 240
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponseTrackDto"
+            }
+          }
+        },
+        "required": [
+          "artists",
+          "albums",
+          "tracks"
+        ]
+      }
+    }
+  }
+}
