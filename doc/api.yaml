@@ -4,7 +4,6 @@
     "/user": {
       "post": {
         "operationId": "UserController_create",
-        "summary": "Create user",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -47,13 +46,13 @@
             "description": "Bad request. artistId is invalid (not uuid)"
           }
         },
+        "summary": "Create user",
         "tags": [
           "Users"
         ]
       },
       "get": {
         "operationId": "UserController_findAll",
-        "summary": "Get all users",
         "parameters": [],
         "responses": {
           "200": {
@@ -71,6 +70,7 @@
             }
           }
         },
+        "summary": "Get all users",
         "tags": [
           "Users"
         ]
@@ -79,7 +79,6 @@
     "/user/{id}": {
       "get": {
         "operationId": "UserController_findOne",
-        "summary": "Get user by id",
         "parameters": [
           {
             "name": "id",
@@ -117,13 +116,13 @@
             "description": "user not found"
           }
         },
+        "summary": "Get user by id",
         "tags": [
           "Users"
         ]
       },
       "put": {
         "operationId": "UserController_update",
-        "summary": "Update user",
         "parameters": [
           {
             "name": "id",
@@ -174,13 +173,13 @@
             "description": "user not found"
           }
         },
+        "summary": "Update user",
         "tags": [
           "Users"
         ]
       },
       "delete": {
         "operationId": "UserController_remove",
-        "summary": "Delete user by id",
         "parameters": [
           {
             "name": "id",
@@ -205,6 +204,7 @@
             "description": "user not found"
           }
         },
+        "summary": "Delete user by id",
         "tags": [
           "Users"
         ]
@@ -213,7 +213,6 @@
     "/artist": {
       "post": {
         "operationId": "ArtistController_create",
-        "summary": "Create artist",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -252,13 +251,13 @@
             "description": "Bad request. artistId is invalid (not uuid)"
           }
         },
+        "summary": "Create artist",
         "tags": [
           "artist"
         ]
       },
       "get": {
         "operationId": "ArtistController_findAll",
-        "summary": "Get all artist",
         "parameters": [],
         "responses": {
           "200": {
@@ -281,6 +280,7 @@
             }
           }
         },
+        "summary": "Get all artist",
         "tags": [
           "artist"
         ]
@@ -289,7 +289,6 @@
     "/artist/{id}": {
       "get": {
         "operationId": "ArtistController_findOne",
-        "summary": "Get artist by id",
         "parameters": [
           {
             "name": "id",
@@ -325,13 +324,13 @@
             "description": "artist not found"
           }
         },
+        "summary": "Get artist by id",
         "tags": [
           "artist"
         ]
       },
       "put": {
         "operationId": "ArtistController_update",
-        "summary": "Update artist",
         "parameters": [
           {
             "name": "id",
@@ -377,13 +376,13 @@
             "description": "artist not found"
           }
         },
+        "summary": "Update artist",
         "tags": [
           "artist"
         ]
       },
       "delete": {
         "operationId": "ArtistController_remove",
-        "summary": "Delete artist by id",
         "parameters": [
           {
             "name": "id",
@@ -408,6 +407,7 @@
             "description": "artist not found"
           }
         },
+        "summary": "Delete artist by id",
         "tags": [
           "artist"
         ]
@@ -416,7 +416,6 @@
     "/track": {
       "post": {
         "operationId": "TrackController_create",
-        "summary": "Create track",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -459,13 +458,13 @@
             "description": "Bad request. artistId is invalid (not uuid)"
           }
         },
+        "summary": "Create track",
         "tags": [
           "track"
         ]
       },
       "get": {
         "operationId": "TrackController_findAll",
-        "summary": "Get all track",
         "parameters": [],
         "responses": {
           "200": {
@@ -490,6 +489,7 @@
             }
           }
         },
+        "summary": "Get all track",
         "tags": [
           "track"
         ]
@@ -498,7 +498,6 @@
     "/track/{id}": {
       "get": {
         "operationId": "TrackController_findOne",
-        "summary": "Get track by id",
         "parameters": [
           {
             "name": "id",
@@ -536,13 +535,13 @@
             "description": "track not found"
           }
         },
+        "summary": "Get track by id",
         "tags": [
           "track"
         ]
       },
       "put": {
         "operationId": "TrackController_update",
-        "summary": "Update track",
         "parameters": [
           {
             "name": "id",
@@ -590,13 +589,13 @@
             "description": "track not found"
           }
         },
+        "summary": "Update track",
         "tags": [
           "track"
         ]
       },
       "delete": {
         "operationId": "TrackController_remove",
-        "summary": "Delete track by id",
         "parameters": [
           {
             "name": "id",
@@ -621,6 +620,7 @@
             "description": "track not found"
           }
         },
+        "summary": "Delete track by id",
         "tags": [
           "track"
         ]
@@ -629,7 +629,6 @@
     "/album": {
       "post": {
         "operationId": "AlbumController_create",
-        "summary": "Create album",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -670,13 +669,13 @@
             "description": "Bad request. artistId is invalid (not uuid)"
           }
         },
+        "summary": "Create album",
         "tags": [
           "album"
         ]
       },
       "get": {
         "operationId": "AlbumController_findAll",
-        "summary": "Get all album",
         "parameters": [],
         "responses": {
           "200": {
@@ -700,6 +699,7 @@
             }
           }
         },
+        "summary": "Get all album",
         "tags": [
           "album"
         ]
@@ -708,7 +708,6 @@
     "/album/{id}": {
       "get": {
         "operationId": "AlbumController_findOne",
-        "summary": "Get album by id",
         "parameters": [
           {
             "name": "id",
@@ -745,13 +744,13 @@
             "description": "album not found"
           }
         },
+        "summary": "Get album by id",
         "tags": [
           "album"
         ]
       },
       "put": {
         "operationId": "AlbumController_update",
-        "summary": "Update album",
         "parameters": [
           {
             "name": "id",
@@ -798,13 +797,13 @@
             "description": "album not found"
           }
         },
+        "summary": "Update album",
         "tags": [
           "album"
         ]
       },
       "delete": {
         "operationId": "AlbumController_remove",
-        "summary": "Delete album by id",
         "parameters": [
           {
             "name": "id",
@@ -829,6 +828,7 @@
             "description": "album not found"
           }
         },
+        "summary": "Delete album by id",
         "tags": [
           "album"
         ]
@@ -837,7 +837,6 @@
     "/favs": {
       "get": {
         "operationId": "FavoritesController_getAllFavorites",
-        "summary": "Get all favorites",
         "parameters": [],
         "responses": {
           "200": {
@@ -879,6 +878,7 @@
             }
           }
         },
+        "summary": "Get all favorites",
         "tags": [
           "favorites"
         ]
@@ -887,7 +887,6 @@
     "/favs/artist/{id}": {
       "post": {
         "operationId": "FavoritesController_addArtist",
-        "summary": "Add artist to favorites",
         "parameters": [
           {
             "name": "id",
@@ -919,13 +918,13 @@
             "description": "artist not found"
           }
         },
+        "summary": "Add artist to favorites",
         "tags": [
           "favorites"
         ]
       },
       "delete": {
         "operationId": "FavoritesController_removeArtist",
-        "summary": "Remove artist from favorites",
         "parameters": [
           {
             "name": "id",
@@ -950,6 +949,7 @@
             "description": "artist not found"
           }
         },
+        "summary": "Remove artist from favorites",
         "tags": [
           "favorites"
         ]
@@ -958,7 +958,6 @@
     "/favs/album/{id}": {
       "post": {
         "operationId": "FavoritesController_addAlbums",
-        "summary": "Add album to favorites",
         "parameters": [
           {
             "name": "id",
@@ -990,13 +989,13 @@
             "description": "album not found"
           }
         },
+        "summary": "Add album to favorites",
         "tags": [
           "favorites"
         ]
       },
       "delete": {
         "operationId": "FavoritesController_removeAlbums",
-        "summary": "Remove album from favorites",
         "parameters": [
           {
             "name": "id",
@@ -1021,6 +1020,7 @@
             "description": "album not found"
           }
         },
+        "summary": "Remove album from favorites",
         "tags": [
           "favorites"
         ]
@@ -1029,7 +1029,6 @@
     "/favs/track/{id}": {
       "post": {
         "operationId": "FavoritesController_addTracks",
-        "summary": "Add track to favorites",
         "parameters": [
           {
             "name": "id",
@@ -1061,13 +1060,13 @@
             "description": "track not found"
           }
         },
+        "summary": "Add track to favorites",
         "tags": [
           "favorites"
         ]
       },
       "delete": {
         "operationId": "FavoritesController_removeTracks",
-        "summary": "Remove track from favorites",
         "parameters": [
           {
             "name": "id",
@@ -1092,6 +1091,7 @@
             "description": "track not found"
           }
         },
+        "summary": "Remove track from favorites",
         "tags": [
           "favorites"
         ]
