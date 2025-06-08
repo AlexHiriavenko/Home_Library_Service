@@ -8,7 +8,7 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone this repo
 ```
 
 ## Installing NPM modules
@@ -16,15 +16,16 @@ git clone {repository URL}
 ```
 npm install
 ```
+Note: Create a `.env` file using the `.env.example` example.
 
 ## Running application
 
 ```
-npm start
+npm run start
 ```
 
 After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/api.
+in your browser OpenAPI documentation by typing http://localhost:4000/api/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 ## Testing

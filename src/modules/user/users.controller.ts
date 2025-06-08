@@ -46,7 +46,7 @@ export class UserController {
   }
 
   @Put(':id')
-  @ApiUpdate('user', UpdateUserPasswordDto, ResponseUserDto)
+  @ApiUpdate('password', UpdateUserPasswordDto, ResponseUserDto)
   @ApiResponse({ status: 403, description: 'old Password is wrong' })
   @UsePipes(validationPipe)
   update(

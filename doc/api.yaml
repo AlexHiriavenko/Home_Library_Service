@@ -128,7 +128,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "UUID user id",
+            "description": "UUID password id",
             "schema": {
               "format": "uuid",
               "example": "123e4567-e89b-12d3-a456-426614174000",
@@ -138,15 +138,13 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "Data for updating an existing user",
+          "description": "Data for updating an existing password",
           "content": {
             "application/json": {
               "schema": {
                 "example": {
-                  "name": "Vasia",
-                  "version": 1,
-                  "createdAt": 1672531199000,
-                  "updatedAt": 1672531299000
+                  "oldPassword": "oldPassword",
+                  "newPassword": "newPassword"
                 }
               }
             }
@@ -154,7 +152,7 @@
         },
         "responses": {
           "200": {
-            "description": "user successfully updated",
+            "description": "password successfully updated",
             "content": {
               "application/json": {
                 "schema": {
@@ -170,10 +168,10 @@
             "description": "old Password is wrong"
           },
           "404": {
-            "description": "user not found"
+            "description": "password not found"
           }
         },
-        "summary": "Update user",
+        "summary": "Update password",
         "tags": [
           "Users"
         ]

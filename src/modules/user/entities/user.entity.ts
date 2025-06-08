@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
-export class UserEntity {
+export class User {
   @ApiProperty({
     format: 'uuid',
     description: 'Unique user ID',
@@ -8,16 +9,23 @@ export class UserEntity {
   })
   id: string;
 
+  @IsNotEmpty()
   @ApiProperty({
-    description: "User's login",
-    example: 'Vasia',
+    example: 'user123',
+    description: 'user login',
   })
   login: string;
 
+  @IsNotEmpty()
   @ApiProperty({
+    example: 'password123',
     description: 'user password',
-    example: 'password_123',
+    minLength: 4,
+    maxLength: 20,
   })
+  @IsString()
+  @MinLength(4, { message: 'The password must contain at least 4 characters' })
+  @MaxLength(20, { message: 'The password must not exceed 20 characters' })
   password: string;
 
   @ApiProperty({ description: 'User Account version', example: 1 })

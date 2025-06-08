@@ -8,6 +8,10 @@ const schemaExample = {
     createdAt: 1672531199000,
     updatedAt: 1672531299000,
   },
+  password: {
+    oldPassword: 'oldPassword',
+    newPassword: 'newPassword',
+  },
   artist: {
     name: 'Vasia',
     grammy: true,
