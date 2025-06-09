@@ -42,9 +42,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # command: >
+    #   sh -c "
+    #   npx prisma migrate dev --name init &&
+    #   npm run start:dev"
     command: >
       sh -c "
-      npx prisma migrate dev --name init &&
+      npx prisma db push &&
       npm run start:dev"
     develop:
       watch:

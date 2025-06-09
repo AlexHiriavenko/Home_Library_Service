@@ -1216,13 +1216,13 @@
           },
           "artistId": {
             "type": "string",
-            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "example": null,
             "format": "uuid | null",
             "description": "Unique artist ID"
           },
           "albumId": {
             "type": "string",
-            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "example": null,
             "format": "uuid | null",
             "description": "Unique album ID"
           },
@@ -1293,7 +1293,7 @@
           "artistId": {
             "type": "string",
             "description": "ID of the artist associated with the album",
-            "example": "123e4567-e89b-12d3-a456-426614174000 | null"
+            "example": null
           }
         },
         "required": [

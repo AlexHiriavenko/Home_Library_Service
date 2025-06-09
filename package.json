@@ -27,8 +27,9 @@
     "prisma:migrate": "prisma migrate dev",
     "docker:start": "docker-compose up --build --watch",
     "docker:down": "docker-compose down",
-    "docker:scanApp": "docker scout cves nodejs2024q3-service-app:latest",
-    "docker:scanDb": "docker scout cves nodejs2024q3-service-db:latest"
+    "docker:scanApp": "docker scout cves nodejs2025q2-service-app:latest",
+    "docker:scanDb": "docker scout cves nodejs2025q2-service-db:latest",
+    "docker:hardReset": "docker-compose down -v --remove-orphans"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.16",
