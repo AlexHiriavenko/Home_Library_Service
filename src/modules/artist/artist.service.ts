@@ -6,53 +6,53 @@ import {
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { DatabaseService } from '../../database/database.service';
 import { isUUID } from 'class-validator';
+import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class ArtistService {
-  constructor(private readonly database: DatabaseService) {}
-  create(createArtistDto: CreateArtistDto) {
+  constructor(private readonly prisma: PrismaService) {}
+  async create(createArtistDto: CreateArtistDto) {
     const artist = {
       id: uuidv4(),
       ...createArtistDto,
     };
-    const newArtist = this.database.artistDatabaseService.create(artist);
+    const newArtist = await this.prisma.artist.create({ data: artist });
     return newArtist;
   }
 
-  findAll() {
-    return this.database.artistDatabaseService.findAll();
+  async findAll() {
+    return await this.prisma.artist.findMany();
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException(
         'Bad request. userId is invalid (not uuid)',
       );
     }
-    const artist = this.database.artistDatabaseService.findOne(id);
+    const artist = await this.prisma.artist.findUnique({ where: { id } });
     if (!artist) {
       throw new NotFoundException('artist not found');
     }
     return artist;
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    this.findOne(id);
-    const updateArtist = this.database.artistDatabaseService.update(
-      id,
-      updateArtistDto,
-    );
+  async update(id: string, updateArtistDto: UpdateArtistDto) {
+    await this.findOne(id);
+    const updateArtist = await this.prisma.artist.update({
+      where: { id },
+      data: { ...updateArtistDto },
+    });
     return { id, ...updateArtist };
   }
 
-  remove(id: string) {
-    const artist = this.findOne(id);
+  async remove(id: string) {
+    const artist = await this.findOne(id);
 
     if (!artist) {
       return null;
     }
 
-    return this.database.artistDatabaseService.remove(id);
+    return await this.prisma.artist.delete({ where: { id } });
   }
 }

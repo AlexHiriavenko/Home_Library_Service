@@ -4,67 +4,137 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
-
-import { DatabaseService } from '../../database/database.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class FavoritesService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  getAllFavorites() {
-    return this.db.favoritesDatabaseService.getAllFavorites();
+  async getAllFavorites() {
+    const [albums, artists, tracks] = await this.prisma.$transaction([
+      this.prisma.album.findMany({ where: { favorite: true } }),
+      this.prisma.artist.findMany({ where: { favorite: true } }),
+      this.prisma.track.findMany({ where: { favorite: true } }),
+    ]);
+
+    const favoriteArtists = artists.map((artist) => ({
+      id: artist.id,
+      name: artist.name,
+      grammy: artist.grammy,
+    }));
+
+    const favoriteAlbums = albums.map((album) => ({
+      id: album.id,
+      name: album.name,
+      year: album.year,
+      artistId: album.artistId,
+    }));
+
+    const favoriteTracks = tracks.map((track) => ({
+      id: track.id,
+      name: track.name,
+      duration: track.duration,
+      artistId: track.artistId,
+      albumId: track.albumId,
+    }));
+
+    return {
+      artists: favoriteArtists,
+      albums: favoriteAlbums,
+      tracks: favoriteTracks,
+    };
   }
 
-  addArtist(id: string) {
+  async addArtist(id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException(
         'Bad request. artistId is invalid (not uuid)',
       );
     }
-    const artist = this.db.artistDatabaseService.findOne(id);
+    const artist = await this.prisma.artist.findUnique({ where: { id } });
 
     if (!artist) {
       throw new UnprocessableEntityException('Artist not found');
     }
 
-    return this.db.favoritesDatabaseService.addArtist(artist);
+    await this.prisma.artist.update({
+      where: { id },
+      data: { favorite: true },
+    });
+
+    return {
+      id: artist.id,
+      name: artist.name,
+      grammy: artist.grammy,
+    };
   }
 
-  removeArtist(id: string) {
-    return this.db.favoritesDatabaseService.removeArtist(id);
+  async removeArtist(id: string) {
+    const artist = await this.prisma.artist.update({
+      where: { id },
+      data: { favorite: false },
+    });
+    return artist;
   }
 
-  addAlbums(id: string) {
+  async addAlbums(id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException(
         'Bad request. albumId is invalid (not uuid)',
       );
     }
-    const album = this.db.albumDatabaseService.findOne(id);
+    const album = await this.prisma.album.findUnique({ where: { id } });
     if (!album) {
       throw new UnprocessableEntityException(`Album not found`);
     }
-    return this.db.favoritesDatabaseService.addAlbum(album);
+    await this.prisma.album.update({
+      where: { id },
+      data: { favorite: true },
+    });
+
+    return {
+      id: album.id,
+      name: album.name,
+      year: album.year,
+      artistId: album.artistId,
+    };
   }
 
-  removeAlbums(id: string) {
-    return this.db.favoritesDatabaseService.removeAlbum(id);
+  async removeAlbums(id: string) {
+    return await this.prisma.album.update({
+      where: { id },
+      data: { favorite: false },
+    });
   }
 
-  addTracks(id: string) {
+  async addTracks(id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException(
         'Bad request. trackId is invalid (not uuid)',
       );
     }
-    const track = this.db.trackDatabaseService.findOne(id);
+    const track = await this.prisma.track.findUnique({ where: { id } });
     if (!track) {
       throw new UnprocessableEntityException('Track not found');
     }
-    return this.db.favoritesDatabaseService.addTrack(track);
+    await this.prisma.track.update({
+      where: { id },
+      data: { favorite: true },
+    });
+
+    return {
+      id: track.id,
+      name: track.name,
+      duration: track.duration,
+      artistId: track.artistId,
+      albumId: track.albumId,
+    };
   }
 
-  removeTracks(id: string) {
-    return this.db.favoritesDatabaseService.removeTrack(id);
+  async removeTracks(id: string) {
+    return await this.prisma.track.update({
+      where: { id },
+      data: { favorite: false },
+    });
   }
 }

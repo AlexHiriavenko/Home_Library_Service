@@ -4,16 +4,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DatabaseService } from '../../database/database.service';
+
 import CreateUserDto from './dto/create-user.dto';
 import UpdateUserPasswordDto from './dto/update-user.dto';
-import { responsUser, User } from 'src/types/types';
 import { isUUID } from 'class-validator';
 import { v4 as uuidv4 } from 'uuid';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private hidePassword(user: User) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -21,16 +22,14 @@ export class UsersService {
     return userWithoutPassword;
   }
 
-  private getUserByIdWithPassword(id: string): User | undefined {
+  private async getUserByIdWithPassword(id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException(
         'Bad request. userId is invalid (not uuid)',
       );
     }
 
-    const user = this.database.usersDatabaseService
-      .getAll()
-      .find((user) => user.id === id);
+    const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -38,36 +37,48 @@ export class UsersService {
     return user;
   }
 
-  findAll() {
-    return this.database.usersDatabaseService
-      .getAll()
-      .map((user) => this.hidePassword(user));
+  private toTimestamp(user: any) {
+    return {
+      ...this.hidePassword(user),
+      createdAt: user.createdAt.getTime(),
+      updatedAt: user.updatedAt.getTime(),
+    };
   }
 
-  findOne(id: string): responsUser {
-    const user = this.getUserByIdWithPassword(id);
-    return this.hidePassword(user);
+  async findAll() {
+    const users = await this.prisma.user.findMany();
+    return users.map((user) => this.toTimestamp(user));
   }
 
-  create(createUserDto: CreateUserDto): responsUser {
+  async findOne(id: string) {
+    const user = await this.getUserByIdWithPassword(id);
+    return this.toTimestamp(user);
+  }
+
+  async create(createUserDto: CreateUserDto) {
     const { login, password } = createUserDto;
     const id = uuidv4();
-    const user: User = {
+    const userCreateInput = {
       id,
       login,
       password,
       version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
-    return this.hidePassword(this.database.usersDatabaseService.create(user));
+
+    const user = await this.prisma.user.create({
+      data: userCreateInput,
+    });
+
+    return this.toTimestamp(user);
   }
 
-  updatePassword(
+  async updatePassword(
     id: string,
     updateUserPasswordDto: UpdateUserPasswordDto,
-  ): responsUser {
-    const currentUser = this.getUserByIdWithPassword(id);
+  ) {
+    const currentUser = await this.getUserByIdWithPassword(id);
 
     const { oldPassword, newPassword } = updateUserPasswordDto;
 
@@ -75,22 +86,25 @@ export class UsersService {
       throw new ForbiddenException('Old password is incorrect');
     }
 
-    const updatedUser = this.database.usersDatabaseService.update(id, {
-      password: newPassword,
-      updatedAt: Date.now(),
-      version: currentUser.version + 1,
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        password: newPassword,
+        updatedAt: new Date(),
+        version: currentUser.version + 1,
+      },
     });
 
     if (!updatedUser) {
       throw new NotFoundException('User not found for update');
     }
 
-    return this.hidePassword(updatedUser);
+    return this.toTimestamp(updatedUser);
   }
 
-  delete(id: string): responsUser {
-    const user = this.getUserByIdWithPassword(id);
-    this.database.usersDatabaseService.delete(id);
-    return this.hidePassword(user);
+  async delete(id: string) {
+    const user = await this.getUserByIdWithPassword(id);
+    await this.prisma.user.delete({ where: { id } });
+    return this.toTimestamp(user);
   }
 }

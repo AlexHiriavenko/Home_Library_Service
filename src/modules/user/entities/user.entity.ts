@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { Exclude, Transform } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class User {
   @ApiProperty({
@@ -26,6 +33,7 @@ export class User {
   @IsString()
   @MinLength(4, { message: 'The password must contain at least 4 characters' })
   @MaxLength(20, { message: 'The password must not exceed 20 characters' })
+  @Exclude()
   password: string;
 
   @ApiProperty({ description: 'User Account version', example: 1 })
@@ -35,11 +43,15 @@ export class User {
     description: 'Date the record was created',
     example: 1672531199000,
   })
+  @IsNumber()
+  @Transform(({ value }) => new Date(value).getTime())
   createdAt: number;
 
   @ApiProperty({
     description: 'The date of the last update of the record',
     example: 1672531299000,
   })
+  @IsNumber()
+  @Transform(({ value }) => new Date(value).getTime())
   updatedAt: number;
 }

@@ -5,54 +5,55 @@ import {
 } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { DatabaseService } from '../../database/database.service';
 import { v4 as uuidv4 } from 'uuid';
 import { isUUID } from 'class-validator';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly db: DatabaseService) {}
-  create(createTrackDto: CreateTrackDto) {
+  constructor(private readonly prisma: PrismaService) {}
+  async create(createTrackDto: CreateTrackDto) {
     const track = {
       id: uuidv4(),
       ...createTrackDto,
     };
-    const newTrack = this.db.trackDatabaseService.create(track);
+    const newTrack = await this.prisma.track.create({ data: track });
     return newTrack;
   }
 
-  findAll() {
-    return this.db.trackDatabaseService.findAll();
+  async findAll() {
+    return await this.prisma.track.findMany();
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException(
         'Bad request. trackId is invalid (not uuid)',
       );
     }
-    const track = this.db.trackDatabaseService.findOne(id);
+    const track = await this.prisma.track.findUnique({ where: { id } });
     if (!track) {
       throw new NotFoundException('track not found');
     }
     return track;
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    this.findOne(id);
+  async update(id: string, updateTrackDto: UpdateTrackDto) {
+    await this.findOne(id);
 
-    const updatedTrack = this.db.trackDatabaseService.update(
-      id,
-      updateTrackDto,
-    );
+    const updatedTrack = await this.prisma.track.update({
+      where: { id },
+      data: { ...updateTrackDto },
+    });
     return { id, ...updatedTrack };
   }
 
-  remove(id: string) {
-    const track = this.findOne(id);
+  async remove(id: string) {
+    const track = await this.findOne(id);
     if (!track) {
       return null;
     }
-    return this.db.trackDatabaseService.remove(id);
+
+    return await this.prisma.track.delete({ where: { id } });
   }
 }
