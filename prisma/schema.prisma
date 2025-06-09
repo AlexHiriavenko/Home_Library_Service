@@ -51,3 +51,4 @@ model Track {
   albumId  String?
   favorite Boolean @default(false)
 }
+

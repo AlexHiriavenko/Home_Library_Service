@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { CreateAlbumDto } from './create-album.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 export class ResponseAlbumDto extends PartialType(CreateAlbumDto) {
   @ApiProperty({
@@ -38,4 +39,7 @@ export class ResponseAlbumDto extends PartialType(CreateAlbumDto) {
   @IsString()
   @IsOptional()
   artistId: string | null;
+
+  @Exclude()
+  favorite: boolean;
 }

@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
+
 import {
   IsDefined,
   IsNotEmpty,
@@ -6,6 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { ResponseAlbumDto } from '../dto/response-album.dto';
 
 export class Album {
   @ApiProperty({
@@ -31,9 +34,16 @@ export class Album {
 
   @ApiProperty({
     description: 'ID of the artist associated with the album',
-    example: '123e4567-e89b-12d3-a456-426614174000 | null',
+    example: null,
   })
   @IsString()
   @IsOptional()
   artistId: string | null;
+
+  @Exclude()
+  favorite: boolean;
+
+  constructor(partial: Partial<ResponseAlbumDto>) {
+    Object.assign(this, partial);
+  }
 }

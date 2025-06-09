@@ -6,6 +6,8 @@
 .gitignore
 
 # Build
+node_modules
+dist
 dist/
 node_modules/
 

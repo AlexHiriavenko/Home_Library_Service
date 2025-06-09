@@ -3,7 +3,9 @@ version: '3.8'
 services:
   db:
     container_name: postgres
-    image: postgres:15-alpine
+    build:
+      context: .
+      dockerfile: db.Dockerfile
     restart: always
     ports:
       - ${DB_PORT}:${DB_PORT}
@@ -15,6 +17,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - postgres_logs:/var/log/postgresql
     networks:
       - app-network
     healthcheck:
@@ -32,10 +35,8 @@ services:
     ports:
       - ${PORT}:${PORT}
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       DATABASE_URL: ${DATABASE_URL}
-    volumes:
-      - .:/app
     networks:
       - app-network
     depends_on:
@@ -44,10 +45,18 @@ services:
     command: >
       sh -c "
       npx prisma migrate dev --name init &&
-      npm run start:prod
-      "
+      npm run start:dev"
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /usr/src/app/src
+          ignore:
+            - node_modules/
+
 volumes:
   postgres_data:
+  postgres_logs:
 
 networks:
   app-network:

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import {
   IsDefined,
   IsNotEmpty,
@@ -15,7 +16,7 @@ export class CreateTrackDto {
   name: string;
 
   @ApiProperty({
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: null,
     format: 'uuid | null',
     description: 'Unique artist ID',
   })
@@ -24,7 +25,7 @@ export class CreateTrackDto {
   artistId: string | null; // refers to Artist
 
   @ApiProperty({
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: null,
     format: 'uuid | null',
     description: 'Unique album ID',
   })
@@ -37,4 +38,7 @@ export class CreateTrackDto {
   @IsNotEmpty()
   @IsDefined()
   duration: number; // integer number
+
+  @Exclude()
+  favorite: boolean;
 }

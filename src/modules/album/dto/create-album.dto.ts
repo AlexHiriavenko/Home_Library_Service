@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import {
   IsDefined,
   IsNotEmpty,
@@ -22,9 +23,12 @@ export class CreateAlbumDto {
 
   @ApiProperty({
     description: 'ID of the artist associated with the album',
-    example: '123e4567-e89b-12d3-a456-426614174000 | null',
+    example: null,
   })
   @IsString()
   @IsOptional()
   artistId: string | null;
+
+  @Exclude()
+  favorite: boolean;
 }

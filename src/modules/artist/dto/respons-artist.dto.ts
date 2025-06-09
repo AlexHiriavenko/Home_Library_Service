@@ -1,6 +1,7 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateArtistDto } from './create-artist.dto';
 import { IsNotEmpty } from 'class-validator';
+import { Exclude } from 'class-transformer';
 
 class ResponseArtistDto extends PartialType(CreateArtistDto) {
   @ApiProperty({
@@ -10,6 +11,9 @@ class ResponseArtistDto extends PartialType(CreateArtistDto) {
   })
   @IsNotEmpty()
   id: string;
+
+  @Exclude()
+  favorite: boolean;
 }
 
 export { ResponseArtistDto };

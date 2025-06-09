@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { IsBoolean, IsDefined, IsNotEmpty, IsString } from 'class-validator';
 
 export class Artist {
@@ -23,4 +24,7 @@ export class Artist {
   @IsNotEmpty()
   @IsDefined()
   grammy: boolean;
+
+  @Exclude()
+  favorite: boolean;
 }
