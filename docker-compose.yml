@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: postgres
+    build:
+      context: .
+      dockerfile: db.Dockerfile
+    restart: always
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_logs:/var/log/postgresql
+    networks:
+      - app-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: ${DATABASE_URL}
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+    # command: >
+    #   sh -c "
+    #   npx prisma migrate dev --name init &&
+    #   npm run start:dev"
+    command: >
+      sh -c "
+      npx prisma db push &&
+      npm run start:dev"
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /usr/src/app/src
+          ignore:
+            - node_modules/
+
+volumes:
+  postgres_data:
+  postgres_logs:
+
+networks:
+  app-network:
+    driver: bridge
