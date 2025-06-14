@@ -11,6 +11,7 @@ import { isUUID } from 'class-validator';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,10 @@ export class UsersService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, parseInt(process.env.CRYPT_SALT, 10));
   }
 
   private async getUserByIdWithPassword(id: string) {
@@ -58,10 +63,12 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const { login, password } = createUserDto;
     const id = uuidv4();
+    const hashedPassword = await this.hashPassword(password);
+
     const userCreateInput = {
       id,
       login,
-      password,
+      password: hashedPassword,
       version: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -82,14 +89,21 @@ export class UsersService {
 
     const { oldPassword, newPassword } = updateUserPasswordDto;
 
-    if (oldPassword !== currentUser.password) {
+    const isOldPasswordValid = await bcrypt.compare(
+      oldPassword,
+      currentUser.password,
+    );
+
+    if (!isOldPasswordValid) {
       throw new ForbiddenException('Old password is incorrect');
     }
+
+    const hashedNewPassword = await this.hashPassword(newPassword);
 
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: {
-        password: newPassword,
+        password: hashedNewPassword,
         updatedAt: new Date(),
         version: currentUser.version + 1,
       },

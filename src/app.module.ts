@@ -6,6 +6,11 @@ import { AlbumModule } from './modules/album/album.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { PrismaModule } from './prisma/prisma.module';
 
+import { LoggingService } from './logging/logging.service';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './logging/logging.interceptor';
+import { AuthModule } from './auth/auth.module';
+
 @Module({
   imports: [
     PrismaModule,
@@ -14,6 +19,14 @@ import { PrismaModule } from './prisma/prisma.module';
     TrackModule,
     AlbumModule,
     FavoritesModule,
+    AuthModule,
+  ],
+  providers: [
+    LoggingService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
   ],
 })
 export class AppModule {}
