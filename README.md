@@ -70,8 +70,6 @@ npm run test -- path    # run a specific test file
 
 ### With authorization
 
-> ⚠️ Not working in this branch
-
 ```bash
 npm run test:auth
 npm run test:auth -- path
