@@ -50,6 +50,8 @@ services:
       sh -c "
       npx prisma db push &&
       npm run start:dev"
+    volumes:
+      - ./logs:/usr/src/app/logs      
     develop:
       watch:
         - action: sync

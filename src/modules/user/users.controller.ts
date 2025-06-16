@@ -22,6 +22,8 @@ import {
   ApiGetById,
   ApiUpdate,
 } from '../../common/decorators/docApi.decorators';
+import { ApiBearerAuth } from '@nestjs/swagger';
+
 @ApiTags('Users')
 @Controller('user')
 export class UserController {
@@ -35,6 +37,7 @@ export class UserController {
 
   @ApiGet('users', ResponseUserDto)
   @Get()
+  @ApiBearerAuth()
   findAll() {
     return this.userService.findAll();
   }

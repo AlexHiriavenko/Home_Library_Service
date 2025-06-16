@@ -52,6 +52,11 @@ npm run docker:hardReset
 npm run docker:start
 ```
 
+## 🔍 Logger
+
+You can find the logs folder in the root of the project
+This logs folder and the files in it will be generated automatically after the first log.
+
 ---
 
 ## 🧪 Testing
