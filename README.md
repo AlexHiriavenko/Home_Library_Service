@@ -1,72 +1,93 @@
-# Home Library Service
+# 🎵 Home Library Service
 
-## Prerequisites
+A NestJS-based application for managing users, artists, albums, and tracks.
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+---
 
-## Downloading
+## 🚀 Quick Start
 
+### 1. Clone the repository
+
+```bash
+git clone <repo-url>
+cd HomeLibraryService/docker_db_orm
 ```
-git clone {repository URL}
-```
 
-## Installing NPM modules
+### 2. Install dependencies
 
-```
+```bash
 npm install
 ```
 
-## Running application
+Create your `.env` file based on the `.env.example`:
 
-```
-npm start
-```
-
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
-
-## Testing
-
-After application running open new terminal and enter:
-
-To run all tests without authorization
-
-```
-npm run test
+```bash
+cp .env.example .env
 ```
 
-To run only one of all test suites
+---
 
-```
-npm run test -- <path to suite>
+## ⚙️ Running the App with 🐳 Docker
+
+```bash
+npm run docker:start
 ```
 
-To run all test with authorization
+- Launches `PostgreSQL` and the NestJS app in containers.
+- Swagger is available at: [http://localhost:4000/api](http://localhost:4000/api)
 
+To stop:
+
+```bash
+Ctrl+C twice
 ```
+
+- First press: wait for containers to gracefully stop
+- Second press: return to the CLI prompt
+
+If something goes wrong:
+
+```bash
+npm run docker:hardReset
+npm run docker:start
+```
+
+## 🔍 Logger
+
+You can find the logs folder in the root of the project
+This logs folder and the files in it will be generated automatically after the first log.
+
+---
+
+## 🧪 Testing
+
+### Without authorization
+
+```bash
+npm run test            # run all tests
+npm run test -- path    # run a specific test file
+```
+
+### With authorization
+
+```bash
 npm run test:auth
+npm run test:auth -- path
 ```
 
-To run only specific test suite with authorization
+---
 
-```
-npm run test:auth -- <path to suite>
-```
+## 💅 Linting and Formatting
 
-### Auto-fix and format
-
-```
-npm run lint
+```bash
+npm run lint      # run linter
+npm run format    # auto-format code
 ```
 
-```
-npm run format
-```
+---
 
-### Debugging in VSCode
+## 🐞 Debugging in VS Code
 
-Press <kbd>F5</kbd> to debug.
+Press <kbd>F5</kbd> in the editor to start debugging.
 
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+Documentation: https://code.visualstudio.com/docs/editor/debugging
