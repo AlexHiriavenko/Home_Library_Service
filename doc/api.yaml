@@ -1094,6 +1094,78 @@
           "favorites"
         ]
       }
+    },
+    "/auth/signup": {
+      "post": {
+        "operationId": "AuthController_signup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokensDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
     }
   },
   "info": {
@@ -1105,6 +1177,13 @@
   "tags": [],
   "servers": [],
   "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
     "schemas": {
       "CreateUserDto": {
         "type": "object",
@@ -1388,6 +1467,52 @@
           "albums",
           "tracks"
         ]
+      },
+      "SignupUserDto": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "example": "user123",
+            "description": "user login"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "description": "user password",
+            "minLength": 4,
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ]
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "example": "user123",
+            "description": "user login"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "description": "user password",
+            "minLength": 4,
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ]
+      },
+      "RefreshTokensDto": {
+        "type": "object",
+        "properties": {}
       }
     }
   }

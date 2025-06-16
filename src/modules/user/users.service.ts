@@ -60,6 +60,14 @@ export class UsersService {
     return this.toTimestamp(user);
   }
 
+  async findByLogin(login: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { login },
+    });
+
+    return user;
+  }
+
   async create(createUserDto: CreateUserDto) {
     const { login, password } = createUserDto;
     const id = uuidv4();
